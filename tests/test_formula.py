@@ -1,12 +1,13 @@
-import pytest
+import html
 import os
 import tempfile
-import html
 
-from src.app import FormulaModel
+import pytest
 
+from src.hexo_helper.app import FormulaModel
 
 # --- Fixtures: 可复用的测试设置和资源 ---
+
 
 @pytest.fixture
 def empty_model():
@@ -48,7 +49,7 @@ $$
 
 """
     temp_fd, temp_filepath = tempfile.mkstemp(suffix=".md", text=True)
-    with os.fdopen(temp_fd, 'w', encoding='utf-8') as f:
+    with os.fdopen(temp_fd, "w", encoding="utf-8") as f:
         f.write(mock_md_content)
 
     model = FormulaModel()
@@ -57,6 +58,7 @@ $$
 
 
 # --- Test Suite: 测试用例集 ---
+
 
 class TestFormulaModelPytest:
     """使用 pytest 风格测试 FormulaModel 类。"""
@@ -86,14 +88,14 @@ class TestFormulaModelPytest:
         assert model.previous_file_content is None  # 打开文件会重置撤销状态
 
         assert len(model.formulas) == 4
-        assert model.formulas[0] == {'id': '1', 'latex': 'E = mc^2 \\'}
-        assert model.formulas[1] == {'id': '无', 'latex': 'a^2 + b^2 = c^2'}
-        assert model.formulas[2] == {'id': 'alpha', 'latex': '\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}'}
-        assert model.formulas[3] == {'id': 'will-be-4', 'latex': ''}  # 测试空公式
+        assert model.formulas[0] == {"id": "1", "latex": "E = mc^2 \\"}
+        assert model.formulas[1] == {"id": "无", "latex": "a^2 + b^2 = c^2"}
+        assert model.formulas[2] == {"id": "alpha", "latex": "\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}"}
+        assert model.formulas[3] == {"id": "will-be-4", "latex": ""}  # 测试空公式
 
         assert len(model.references) == 2
-        assert model.references[0]['ref_id'] == '1'
-        assert model.references[1]['ref_id'] == '99'
+        assert model.references[0]["ref_id"] == "1"
+        assert model.references[1]["ref_id"] == "99"
 
     def test_get_processed_content_logic(self, model_with_temp_file):
         """测试核心的重新编号和引用更新逻辑。 (此测试逻辑未变，依然有效)"""
@@ -105,27 +107,39 @@ class TestFormulaModelPytest:
         assert deleted_refs == 1  # (99) 这个引用被删除了
 
         # 1. 第一个公式应该被重新编号为 (1)
-        assert """$$
+        assert (
+            """$$
   E = mc^2 \\
   \\tag{1}
-$$""" in new_content
+$$"""
+            in new_content
+        )
 
         # 2. 第二个公式（原来无编号）应该被编号为 (2)
-        assert """$$
+        assert (
+            """$$
   a^2 + b^2 = c^2
   \\tag{2}
-$$""" in new_content
+$$"""
+            in new_content
+        )
 
         # 3. 第三个公式应该被重新编号为 (3)
-        assert """  $$
+        assert (
+            """  $$
     \\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}
     \\tag{3}
-  $$""" in new_content
+  $$"""
+            in new_content
+        )
 
         # 4. 第四个空公式应该被编号为 (4)
-        assert """$$
+        assert (
+            """$$
   \\tag{4}
-$$""" in new_content
+$$"""
+            in new_content
+        )
 
         # 5. 对公式 (1) 的引用应该被正确更新
         latex_for_ref1 = html.escape("E = mc^2 \\", quote=True)
@@ -153,7 +167,7 @@ $$""" in new_content
         assert model.is_dirty is True
 
         # 验证文件内容确实已被写入
-        with open(temp_filepath, 'r', encoding='utf-8') as f:
+        with open(temp_filepath, encoding="utf-8") as f:
             read_content = f.read()
         assert read_content == new_content
 
@@ -208,7 +222,7 @@ $$""" in new_content
         assert empty_model.previous_file_content is None  # 撤销是单步的
         # 确认内容被重新解析
         assert len(empty_model.formulas) == 1
-        assert empty_model.formulas[0]['id'] == '1'
+        assert empty_model.formulas[0]["id"] == "1"
 
     def test_undo_last_change_without_history(self, empty_model):
         """测试在没有可撤销状态时调用撤销。"""

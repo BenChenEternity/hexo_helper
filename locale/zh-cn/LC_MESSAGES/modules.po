@@ -14,4 +14,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: pygettext.py 1.5\n"
 
+msgid "Settings"
+msgstr "设置"
 
+msgid "Language Settings"
+msgstr "语言设置"
+
+msgid "Language"
+msgstr "语言"
+
+msgid "Apply"
+msgstr "申请"
