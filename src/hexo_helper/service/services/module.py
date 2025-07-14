@@ -98,7 +98,7 @@ class ModuleService(Service):
     def get_registered_module_info(self, id: str) -> dict:
         return ModuleService._get_from_dict(self.registered_modules, id)
 
-    def get_activated_instance(self, id: str) -> Module:
+    def get_activated_instance(self, id: str) -> Module | None:
         parts = id.split(".")
         current = self.activated_tree
 
@@ -109,7 +109,7 @@ class ModuleService(Service):
 
         for part in parts[1:]:
             if part not in current.children:
-                raise ModuleInstanceNotFoundException(f"Instance '{id}' not found at '{part}'")
+                return None
             current = current.children[part]
 
         return current
@@ -150,6 +150,11 @@ class ModuleService(Service):
         if not parent_instance_id:
             # It creates the module but does not attach it to self.activated_tree.
             self._create_and_prepare_module(module_id, instance_name, None)
+            return
+
+        instance = self.get_activated_instance(f"{parent_instance_id}.{instance_name}")
+        if instance:
+            instance.highlight_view()
             return
 
         # Get the parent instance from the live activated tree

@@ -36,6 +36,7 @@ class SettingsView(View):
         UI.center_window(toplevel_window)
         # The window is a container, and its title is translatable.
         self.widgets.register(toplevel_window, widget_id="toplevel_window", tags=["container", "i18n"])
+        self.window = toplevel_window
 
         main_frame = ttk.Frame(toplevel_window)
         main_frame.pack(fill="both", expand=True, padx=20, pady=20)

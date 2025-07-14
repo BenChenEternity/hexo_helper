@@ -24,8 +24,8 @@ class MainController(CommunicationController):
         # load images
         self.view.load_images(
             {
-                "settings": self.communicator.resource_load_image("settings.png"),
-                "info": self.communicator.resource_load_image("info.png"),
+                "settings": self.api.load_image("settings.png"),
+                "info": self.api.load_image("info.png"),
             }
         )
 
@@ -35,16 +35,10 @@ class MainController(CommunicationController):
         }
 
     def _on_settings_click(self):
-        self.communicator.module_activate(
+        self.api.activate_module(
             MODULE_MAIN_SETTINGS,
             self.instance_id,
         )
 
     def cleanup(self):
-        self.communicator.destroy()
-
-    #
-    # def on_open_project(self):
-    #     path = filedialog.askdirectory()
-    #     if path:
-    #         self.model.add_project(path)
+        self.api.destroy()

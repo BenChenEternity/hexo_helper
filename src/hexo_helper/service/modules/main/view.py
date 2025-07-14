@@ -32,6 +32,7 @@ class MainView(View):
         UI.center_window(main_frame.winfo_toplevel())
         # The main frame is a container.
         self.widgets.register(main_frame, widget_id="main_frame", tags={"container"})
+        self.window = main_frame
 
         # --- Styles ---
         style = ttk.Style()

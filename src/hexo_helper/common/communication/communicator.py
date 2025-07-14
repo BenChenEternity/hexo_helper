@@ -21,3 +21,9 @@ class Communicator:
         when listening for a specified event, execute corresponding function.
         """
         self.receiver.subscribe(event, function)
+
+    def unbind(self, event: str, function: Callable):
+        self.receiver.unsubscribe(event, function)
+
+    def unbind_all(self):
+        self.receiver.unsubscribe_all()

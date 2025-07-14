@@ -12,6 +12,7 @@ class View:
         self.producer = None
         self.master = None
         self.widgets = WidgetManager()
+        self.window = None
 
     def set_master(self, master: tk.Toplevel | tk.Tk | tk.Frame | ttk.Frame) -> None:
         self.master = master
@@ -46,3 +47,6 @@ class View:
     def cleanup(self) -> None:
         """destroy widgets, etc."""
         pass
+
+    def get_window(self):
+        return self.window.winfo_toplevel() if self.window else None

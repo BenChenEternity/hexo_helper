@@ -25,10 +25,12 @@ class SettingsController(CommunicationController):
         self.internal_consumer.subscribe(CLOSE_WINDOW_CLICKED, self._on_close)
         self.internal_consumer.subscribe(MAIN_SETTINGS_LANGUAGE_SELECTED, self._on_language_selected)
         self.internal_consumer.subscribe(MAIN_SETTINGS_APPLY_CLICKED, self._on_apply_clicked)
-        self.communicator.bind(COMMAND_REFRESH_I18N, self._refresh_i18n)
+        self.api.bind(COMMAND_REFRESH_I18N, self._refresh_i18n)
 
     def _on_close(self):
-        self.communicator.module_deactivate(self.instance_id)
+        self.api.deactivate_module(self.instance_id)
+        self.internal_consumer.unsubscribe_all()
+        self.api.unbind_all()
 
     def _dirty_check(self):
         if not self.model.is_dirty():
@@ -46,12 +48,12 @@ class SettingsController(CommunicationController):
     def _on_apply_clicked(self):
         dirty_fields = self.model.get_dirty_fields()
         dirty_data = {field: self.model.get(field) for field in dirty_fields}
-        self.communicator.blackboard_update(dirty_data)
+        self.api.update_settings(dirty_data)
 
         for k, v in dirty_data.items():
             if k == BlackboardKey.LANGUAGE.value:
-                self.communicator.config_set_language(v)
-                self.communicator.command_refresh_i18n()
+                self.api.config_set_language(v)
+                self.api.command_refresh_i18n()
                 continue
 
         self.model.apply()

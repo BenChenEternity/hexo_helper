@@ -109,6 +109,14 @@ class Module:
             raise RuntimeError(f"Module ({name}) already exists")
         self.children[name] = child
 
+    def highlight_view(self):
+        if not self.view:
+            return
+        window = self.view.get_window()
+        window.deiconify()
+        window.lift()
+        window.focus_force()
+
 
 def create_module_dict(
     clz: Type["Module"],
