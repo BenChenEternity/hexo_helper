@@ -4,6 +4,7 @@ from PIL import ImageTk
 
 from src.hexo_helper.core.mvc.view import View
 from src.hexo_helper.core.utils.ui import UI
+from src.hexo_helper.core.widget import WidgetManager
 from src.hexo_helper.service.constants import MAIN_INFO_CLICKED, MAIN_SETTINGS_CLICKED
 from src.hexo_helper.service.enum import BlackboardKey
 
@@ -14,9 +15,6 @@ class MainView(View):
         # PhotoImage objects need to be stored as instance variables to prevent garbage collection.
         self.info_icon = None
         self.settings_icon = None
-        # Icons must be instance variables to prevent garbage collection
-        self.info_icon = None  # to load
-        self.settings_icon = None  # to load
         self.button_size = 32
 
     def create_widgets(self):
@@ -27,6 +25,8 @@ class MainView(View):
         - 'button': For clickable buttons.
         - 'i18n': A cross-cutting tag for any widget whose text needs translation.
         """
+        self.widgets = WidgetManager()
+
         main_frame = ttk.Frame(self.master)
         main_frame.pack(fill="both", expand=True)
         UI.center_window(main_frame.winfo_toplevel())

@@ -3,7 +3,6 @@ from abc import abstractmethod
 from tkinter import ttk
 
 from src.hexo_helper.core.event import EventBus, Producer
-from src.hexo_helper.core.widget import WidgetManager
 
 
 class View:
@@ -11,7 +10,7 @@ class View:
         # view ---internal_bus---> controller
         self.producer = None
         self.master = None
-        self.widgets = WidgetManager()
+        self.widgets = None
         self.window = None
 
     def set_master(self, master: tk.Toplevel | tk.Tk | tk.Frame | ttk.Frame) -> None:

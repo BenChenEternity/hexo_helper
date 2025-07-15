@@ -1,9 +1,11 @@
 import tkinter as tk
+from enum import Enum
 from tkinter import ttk
 from typing import Set
 
 from src.hexo_helper.core.mvc.view import View
 from src.hexo_helper.core.utils.ui import UI
+from src.hexo_helper.core.widget import I18nWidgetManager
 from src.hexo_helper.exceptions import WidgetNotFoundException
 from src.hexo_helper.service.constants import (
     CLOSE_WINDOW_CLICKED,
@@ -14,6 +16,13 @@ from src.hexo_helper.service.enum import BlackboardKey
 from src.hexo_helper.settings import LANGUAGES
 
 from . import _
+
+
+class I18nWidgetsId(Enum):
+    TOPLEVEL_WINDOW = "toplevel_window"
+    LANGUAGE_FRAME = "language_frame"
+    LANGUAGE_LABEL = "language_label"
+    APPLY_BUTTON = "apply_button"
 
 
 class SettingsView(View):
@@ -31,11 +40,20 @@ class SettingsView(View):
         - 'dirty_indicator': For labels that show a state (*), not translatable text.
         - 'i18n': A cross-cutting tag for any widget whose text needs translation.
         """
+        i18n_map = {
+            I18nWidgetsId.TOPLEVEL_WINDOW.value: "{Settings}",
+            I18nWidgetsId.LANGUAGE_FRAME.value: "{Language Settings}",
+            I18nWidgetsId.LANGUAGE_LABEL.value: "{Language}:",
+            I18nWidgetsId.APPLY_BUTTON.value: "{Apply}",
+        }
+        self.widgets = I18nWidgetManager(i18n_map, _)
+
         toplevel_window = tk.Toplevel(self.master.winfo_toplevel())
-        toplevel_window.title(_("Settings"))
         UI.center_window(toplevel_window)
         # The window is a container, and its title is translatable.
-        self.widgets.register(toplevel_window, widget_id="toplevel_window", tags=["container", "i18n"])
+        self.widgets.register(
+            toplevel_window, widget_id=I18nWidgetsId.TOPLEVEL_WINDOW.value, tags=["container", "i18n"]
+        )
         self.window = toplevel_window
 
         main_frame = ttk.Frame(toplevel_window)
@@ -43,7 +61,7 @@ class SettingsView(View):
         self.widgets.register(main_frame, tags=["container"])
 
         # --- Language Settings ---
-        language_frame = ttk.LabelFrame(main_frame, text=_("Language Settings"), padding=10)
+        language_frame = ttk.LabelFrame(main_frame, padding=10)
         language_frame.pack(fill="x")
         language_frame.grid_columnconfigure(0, minsize=120)
         language_frame.grid_columnconfigure(1, weight=1)
@@ -85,6 +103,8 @@ class SettingsView(View):
         apply_button.config(state="disabled")
         # This is a button and is translatable.
         self.widgets.register(apply_button, widget_id="apply_button", tags=["button", "i18n"])
+
+        self.widgets.refresh_i18n()
 
     def cleanup(self) -> None:
         toplevel_window = self.widgets.get_by_id("toplevel_window")
@@ -130,18 +150,19 @@ class SettingsView(View):
         self.widgets.get_by_id("apply_button").config(state="disabled")
 
     def refresh_i18n(self):
-        # Update window title
-        toplevel_window = self.widgets.get_by_id("toplevel_window")
-        toplevel_window.title(_("Settings"))
-
-        # Update labelframe text
-        language_frame = self.widgets.get_by_id("language_frame")
-        language_frame.config(text=_("Language Settings"))
-
-        # Update label text
-        language_label = self.widgets.get_by_id("language_label")
-        language_label.config(text=_("Language") + ":")
-
-        # Update button text
-        apply_button = self.widgets.get_by_id("apply_button")
-        apply_button.config(text=_("Apply"))
+        self.widgets.refresh_i18n()
+        # # Update window title
+        # toplevel_window = self.widgets.get_by_id("toplevel_window")
+        # toplevel_window.title(_("Settings"))
+        #
+        # # Update labelframe text
+        # language_frame = self.widgets.get_by_id("language_frame")
+        # language_frame.config(text=_("Language Settings"))
+        #
+        # # Update label text
+        # language_label = self.widgets.get_by_id("language_label")
+        # language_label.config(text=_("Language") + ":")
+        #
+        # # Update button text
+        # apply_button = self.widgets.get_by_id("apply_button")
+        # apply_button.config(text=_("Apply"))
