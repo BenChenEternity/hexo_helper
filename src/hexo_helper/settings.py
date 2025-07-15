@@ -1,26 +1,28 @@
 import logging
+import platform
 from collections import OrderedDict
 from pathlib import Path
 
 import platformdirs
 
-# --- 基本信息 ---
-APP_NAME = "Hexo Helper"
+# --- runtime info ---
+os_type = platform.system()
 
-# --- 默认配置 ---
+# --- basic ---
+APP_NAME = "Hexo Helper"
 DEFAULT_SETTINGS = {
     "language": "en",
-    "theme": "default",
+    "theme": "cosmo",
 }
 
-# --- 路径定义 ---
+# --- path ---
 ROOT_PATH = Path(__file__).parent.parent.parent.resolve()
+
 ASSETS_PATH = ROOT_PATH / "assets"
 IMAGE_PATH = ASSETS_PATH / "images"
 LOCALE_DIR = ROOT_PATH / "locale"
 
-# --- 用户数据路径 (持久化) ---
-# 使用 platformdirs 手动构建，确保路径唯一性
+# --- user data ---
 BASE_DATA_DIR = Path(platformdirs.user_data_dir())
 APP_DATA_DIR = BASE_DATA_DIR / APP_NAME
 SETTINGS_FILE_PATH = APP_DATA_DIR / "settings.json"
@@ -36,7 +38,29 @@ LANGUAGES = OrderedDict(
     }
 )
 
-# Log
+# --- themes ---
+THEMES = OrderedDict(
+    {
+        # --- ttkbootstrap light themes ---
+        "litera": "Litera (Modern Flat)",
+        "cosmo": "Cosmo (Modern Bootswatch)",
+        "flatly": "Flatly (Modern Flat)",
+        "journal": "Journal (Modern Sketchy)",
+        "lumen": "Lumen (Modern Bright)",
+        "minty": "Minty (Modern Green)",
+        "pulse": "Pulse (Modern Vibrant)",
+        "sandstone": "Sandstone (Modern Warm)",
+        "united": "United (Modern Ubuntu)",
+        "yeti": "Yeti (Modern Clean)",
+        # --- ttkbootstrap dark themes ---
+        "superhero": "Superhero (Dark)",
+        "darkly": "Darkly (Dark)",
+        "cyborg": "Cyborg (Dark Blue)",
+        "vapor": "Vapor (Dark Pink/Purple)",
+    }
+)
+
+# --- Log ---
 LOG_FILE_PATH = APP_DATA_DIR / "app.log"
 ROOT_LOGGER_LEVEL = logging.DEBUG
 CONSOLE_HANDLER_LEVEL = logging.INFO

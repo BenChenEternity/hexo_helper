@@ -27,6 +27,7 @@ class MainController(ServiceRequestController):
             {
                 "settings": client_api.load_image("settings.png"),
                 "info": client_api.load_image("info.png"),
+                "app": client_api.load_image("app.png"),
             }
         )
 

@@ -2,7 +2,7 @@ from typing import Any, List
 
 from src.hexo_helper.core.event import Consumer, EventBus, Producer
 from src.hexo_helper.service.constants import EVENT_REQUEST_SERVICE
-from src.hexo_helper.service.services.enum import ServiceName
+from src.hexo_helper.service.enum import ServiceName
 
 service_request_bus = EventBus()
 command_bus = EventBus()

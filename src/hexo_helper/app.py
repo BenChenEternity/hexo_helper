@@ -1,5 +1,6 @@
 import logging
-import tkinter as tk
+
+import ttkbootstrap as ttkb
 
 from src.hexo_helper.core.log import LoggingManager
 from src.hexo_helper.service.services.blackboard import BlackboardService
@@ -30,7 +31,8 @@ class Application:
         logging.info("Application starting up...")
 
         # create root window
-        self.root = tk.Tk()
+        self.root = ttkb.Window()
+        self.root.withdraw()
         self.root.minsize(800, 600)
         self.root.title(APP_NAME)
 

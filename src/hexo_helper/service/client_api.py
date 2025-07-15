@@ -1,7 +1,7 @@
 from typing import Any
 
 from src.hexo_helper.common.component import ServiceRequestProducer
-from src.hexo_helper.service.services.enum import ServiceName
+from src.hexo_helper.service.enum import ServiceName
 
 
 class ClientAPI(ServiceRequestProducer):
@@ -62,6 +62,13 @@ class ClientAPI(ServiceRequestProducer):
             service_name=ServiceName.CONFIG,
             operation="set_language",
             language=language,
+        )
+
+    def config_set_theme(self, theme: str) -> None:
+        self.call(
+            service_name=ServiceName.CONFIG,
+            operation="set_theme",
+            theme=theme,
         )
 
     # --- Command Shortcuts ---

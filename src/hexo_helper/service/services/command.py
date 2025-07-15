@@ -2,8 +2,8 @@ from src.hexo_helper.common.component import (
     CommandProducer,
 )
 from src.hexo_helper.service.constants import COMMAND_REFRESH_I18N
+from src.hexo_helper.service.enum import ServiceName
 from src.hexo_helper.service.services.base import Service
-from src.hexo_helper.service.services.enum import ServiceName
 
 
 class CommandService(Service):

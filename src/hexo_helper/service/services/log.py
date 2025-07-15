@@ -1,6 +1,6 @@
 from src.hexo_helper.core.log import LoggingManager
+from src.hexo_helper.service.enum import ServiceName
 from src.hexo_helper.service.services.base import Service
-from src.hexo_helper.service.services.enum import ServiceName
 
 
 class LogService(Service):
@@ -17,7 +17,7 @@ class LogService(Service):
         pass
 
     def _get_operation_mapping(self) -> dict:
-        pass
+        return {}
 
     def shutdown(self):
         pass

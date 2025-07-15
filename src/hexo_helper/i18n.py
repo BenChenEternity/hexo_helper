@@ -1,6 +1,6 @@
 import gettext
 
-from settings import DOMAINS, LOCALE_DIR
+from .settings import DOMAINS, LOCALE_DIR
 
 _translators = {}
 

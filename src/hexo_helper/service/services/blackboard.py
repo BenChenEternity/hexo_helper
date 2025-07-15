@@ -2,8 +2,8 @@ import copy
 
 from src.hexo_helper.core.blackboard import Blackboard
 from src.hexo_helper.core.settings import SettingsManager
+from src.hexo_helper.service.enum import ServiceName
 from src.hexo_helper.service.services.base import Service
-from src.hexo_helper.service.services.enum import ServiceName
 from src.hexo_helper.settings import DEFAULT_SETTINGS, SETTINGS_FILE_PATH
 
 

@@ -93,7 +93,7 @@ class I18nWidgetManager(WidgetManager):
             raise TypeError
 
     def _process(self, text):
-        def repl(match):
+        def repl(match: re.Match) -> str:
             key = match.group(1)
             return str(self.i18n_function(key))
 

@@ -15,7 +15,7 @@ class MainView(View):
         # PhotoImage objects need to be stored as instance variables to prevent garbage collection.
         self.info_icon = None
         self.settings_icon = None
-        self.button_size = 32
+        self.app_icon = None
 
     def create_widgets(self):
         """
@@ -36,14 +36,15 @@ class MainView(View):
 
         # --- Styles ---
         style = ttk.Style()
-        style.configure("Header.TFrame", background="#f0f0f0")
-        style.configure("Header.TButton", background="#f0f0f0", borderwidth=0, focuscolor="none")
-        style.map("Header.TButton", background=[("active", "#e0e0e0")])
+        style.configure("Header.TButton", borderwidth=0, focuscolor="none")
+        style.map(
+            "Header.TButton",
+            background=[("active", style.lookup("TButton", "selectbackground"))],
+        )
 
         # --- Custom Title Bar ---
-        title_bar = ttk.Frame(main_frame, height=self.button_size + 10, style="Header.TFrame")
-        title_bar.pack(fill="x", side="top", padx=1, pady=1)
-        title_bar.pack_propagate(False)
+        title_bar = ttk.Frame(main_frame, style="Header.TFrame")
+        title_bar.pack(fill="x", side="top", padx=1, pady=5)
         # The title bar is a container.
         self.widgets.register(title_bar, widget_id="title_bar", tags={"container"})
 
@@ -55,7 +56,7 @@ class MainView(View):
         settings_button.pack(side="right", padx=(0, 5))
         self.widgets.register(settings_button, widget_id="settings_button", tags={"button"})
 
-        title_label = ttk.Label(title_bar, text="...", font=("Segoe UI", 16, "bold"), background="#f0f0f0")
+        title_label = ttk.Label(title_bar, text="...", font=("Segoe UI", 16, "bold"))
         title_label.pack(expand=True)
         # This is a label. Its text is dynamic, so we won't tag it 'i18n' for static translation.
         self.widgets.register(title_label, widget_id="title_label", tags={"label"})
@@ -75,8 +76,10 @@ class MainView(View):
     def load_images(self, images_data: dict):
         self.settings_icon = ImageTk.PhotoImage(images_data["settings"])
         self.info_icon = ImageTk.PhotoImage(images_data["info"])
+        self.app_icon = ImageTk.PhotoImage(images_data["app"])
         self.widgets.get_by_id("settings_button").config(image=self.settings_icon)
         self.widgets.get_by_id("info_button").config(image=self.info_icon)
+        self.master.iconphoto(False, self.app_icon)
 
     def setup_bindings(self):
         """Set up all event bindings here."""

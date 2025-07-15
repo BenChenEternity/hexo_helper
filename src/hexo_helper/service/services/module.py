@@ -8,10 +8,10 @@ from src.hexo_helper.exceptions import (
     ActivateTreeException,
     ModuleInstanceNotFoundException,
 )
+from src.hexo_helper.service.enum import ModuleName, ServiceName
 from src.hexo_helper.service.modules.main.module import MainModule
 from src.hexo_helper.service.modules.main.settings.module import SettingsModule
 from src.hexo_helper.service.services.base import Service
-from src.hexo_helper.service.services.enum import ModuleName, ServiceName
 
 registered_modules = {
     ModuleName.MAIN.value: c(

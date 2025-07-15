@@ -10,8 +10,6 @@ from typing import Dict, List, Set
 import polib
 
 # 注意：此脚本的异步翻译功能依赖于一个支持 asyncio 的 googletrans 库，
-# 例如 'googletrans-py'。请确保您已安装正确的库。
-# pip install googletrans-py
 from googletrans import Translator
 from googletrans.models import Translated
 
@@ -34,7 +32,7 @@ if not support_languages:
 
 auto_translate = config.getboolean("i18n", "auto_translate", fallback=False)
 
-SERVICES_DIR = ROOT_PATH / "src" / "service"
+SERVICES_DIR = ROOT_PATH / "src" / "hexo_helper" / "service"
 LOCALE_DIR = ROOT_PATH / "locale"
 EN_DIR = LOCALE_DIR / "en" / "LC_MESSAGES"
 # 使用一个临时的 .pot 目录，避免混淆
@@ -76,7 +74,7 @@ async def batch_translate_texts(texts: Set[str], target_langs: List[str]) -> Dic
     """
     if not texts:
         return {}
-    print(f"\n--- 准备将 {len(texts)} 条独特文本翻译成 {len(target_langs)} 种语言 ---")
+    print(f"\n--- 准备将 {len(texts)} 条独特文本翻译成 {target_langs} 语言 ---")
     tasks = []
     # googletrans-py 推荐为每个请求创建新的 Translator 实例
     translator = Translator()
@@ -97,6 +95,10 @@ async def batch_translate_texts(texts: Set[str], target_langs: List[str]) -> Dic
             result = results[task_index]
             if isinstance(result, Translated) and result.text:
                 translations_map[text][lang] = result.text
+                print(f"当前语言: {lang}")
+                print("------- 翻译结果 ---------")
+                print(result.text)
+                print("------------------------")
             else:
                 error_msg = repr(result) if isinstance(result, Exception) else f"返回类型无效: {type(result)}"
                 print(f"  ❌ 翻译 '{text[:30]}...' 到 '{lang}' 失败: {error_msg}")

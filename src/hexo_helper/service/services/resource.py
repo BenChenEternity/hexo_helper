@@ -1,6 +1,6 @@
 from src.hexo_helper.core.resource import ImageResourceLoader
+from src.hexo_helper.service.enum import ServiceName
 from src.hexo_helper.service.services.base import Service
-from src.hexo_helper.service.services.enum import ServiceName
 from src.hexo_helper.settings import IMAGE_PATH
 
 

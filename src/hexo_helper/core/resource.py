@@ -32,5 +32,6 @@ class ImageResourceLoader(ResourceLoader):
         path = self.path / name
         with Image.open(path) as img:
             img.load()
+            self._cache[name] = img
             return img
         # if not found raise exception
