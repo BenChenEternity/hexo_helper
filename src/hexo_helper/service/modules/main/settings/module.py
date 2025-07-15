@@ -1,4 +1,4 @@
-from src.hexo_helper.common.module.module import Module
+from src.hexo_helper.common.module import Module
 from src.hexo_helper.core.mvc.controller import Controller
 from src.hexo_helper.core.mvc.model import Model
 from src.hexo_helper.core.mvc.view import View

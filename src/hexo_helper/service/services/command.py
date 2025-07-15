@@ -1,4 +1,4 @@
-from src.hexo_helper.common.communication.component import (
+from src.hexo_helper.common.component import (
     CommandProducer,
 )
 from src.hexo_helper.service.constants import COMMAND_REFRESH_I18N

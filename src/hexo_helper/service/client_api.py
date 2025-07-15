@@ -1,16 +1,13 @@
 from typing import Any
 
-from src.hexo_helper.service.communicator import ServiceCommunicator
+from src.hexo_helper.common.component import ServiceRequestProducer
 from src.hexo_helper.service.services.enum import ServiceName
 
 
-class ClientAPI(ServiceCommunicator):
+class ClientAPI(ServiceRequestProducer):
     """
     An application-specific API layer that provides convenient, high-level
     methods for common cross-controller operations.
-
-    It inherits from the generic ServiceCommunicator and builds upon its
-    universal `call` method.
     """
 
     # --- Blackboard Shortcuts ---

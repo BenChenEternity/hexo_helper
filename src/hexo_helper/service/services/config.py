@@ -1,4 +1,6 @@
 from src.hexo_helper.i18n import setup_translations
+from src.hexo_helper.service.client_api import client_api
+from src.hexo_helper.service.enum import BlackboardKey
 from src.hexo_helper.service.services.base import Service
 from src.hexo_helper.service.services.enum import ServiceName
 
@@ -13,7 +15,8 @@ class ConfigService(Service):
         super().__init__()
 
     def start(self):
-        setup_translations("en")
+        language = client_api.read_setting(BlackboardKey.LANGUAGE.value)
+        self.set_language(language)
 
     def _get_operation_mapping(self) -> dict:
         return {

@@ -1,6 +1,6 @@
 from typing import Dict
 
-from src.hexo_helper.common.communication.component import ServiceConsumer
+from src.hexo_helper.common.component import ServiceConsumer
 from src.hexo_helper.exceptions import ServiceNotFoundException
 from src.hexo_helper.service.constants import EVENT_REQUEST_SERVICE
 from src.hexo_helper.service.services.base import Service

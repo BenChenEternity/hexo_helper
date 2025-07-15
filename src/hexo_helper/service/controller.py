@@ -1,15 +1,16 @@
 from abc import abstractmethod
 
+from src.hexo_helper.common.component import CommandConsumer
 from src.hexo_helper.core.mvc.controller import Controller
 from src.hexo_helper.core.mvc.model import Model
 from src.hexo_helper.core.mvc.view import View
-from src.hexo_helper.service.client_api import ClientAPI, client_api
+from src.hexo_helper.service.client_api import client_api
 
 
-class CommunicationController(Controller):
+class ServiceRequestController(Controller):
     def __init__(self, model: Model | None, view: View | None):
         super().__init__(model, view)
-        self.api: ClientAPI = client_api
+        self.command_consumer = CommandConsumer()
 
     @abstractmethod
     def setup_handlers(self):
@@ -22,4 +23,4 @@ class CommunicationController(Controller):
         return self.model.keys()
 
     def get_model_data(self) -> dict:
-        return {key: self.api.read_setting(key) for key in self.get_model_key() if key is not None}
+        return {key: client_api.read_setting(key) for key in self.get_model_key() if key is not None}

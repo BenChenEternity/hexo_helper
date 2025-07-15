@@ -1,12 +1,13 @@
 import logging
 
+from src.hexo_helper.service.client_api import client_api
 from src.hexo_helper.service.constants import (
     CLOSE_WINDOW_CLICKED,
     COMMAND_REFRESH_I18N,
     MAIN_SETTINGS_APPLY_CLICKED,
     MAIN_SETTINGS_LANGUAGE_SELECTED,
 )
-from src.hexo_helper.service.controller import CommunicationController
+from src.hexo_helper.service.controller import ServiceRequestController
 from src.hexo_helper.service.enum import BlackboardKey
 from src.hexo_helper.service.modules.main.settings.model import SettingsModel
 from src.hexo_helper.service.modules.main.settings.view import SettingsView
@@ -14,7 +15,7 @@ from src.hexo_helper.service.modules.main.settings.view import SettingsView
 logger = logging.getLogger(__name__)
 
 
-class SettingsController(CommunicationController):
+class SettingsController(ServiceRequestController):
     model: SettingsModel
     view: SettingsView
 
@@ -25,12 +26,12 @@ class SettingsController(CommunicationController):
         self.internal_consumer.subscribe(CLOSE_WINDOW_CLICKED, self._on_close)
         self.internal_consumer.subscribe(MAIN_SETTINGS_LANGUAGE_SELECTED, self._on_language_selected)
         self.internal_consumer.subscribe(MAIN_SETTINGS_APPLY_CLICKED, self._on_apply_clicked)
-        self.api.bind(COMMAND_REFRESH_I18N, self._refresh_i18n)
+        self.command_consumer.subscribe(COMMAND_REFRESH_I18N, self._refresh_i18n)
 
     def _on_close(self):
-        self.api.deactivate_module(self.instance_id)
+        client_api.deactivate_module(self.instance_id)
         self.internal_consumer.unsubscribe_all()
-        self.api.unbind_all()
+        self.command_consumer.unsubscribe_all()
 
     def _dirty_check(self):
         if not self.model.is_dirty():
@@ -48,12 +49,12 @@ class SettingsController(CommunicationController):
     def _on_apply_clicked(self):
         dirty_fields = self.model.get_dirty_fields()
         dirty_data = {field: self.model.get(field) for field in dirty_fields}
-        self.api.update_settings(dirty_data)
+        client_api.update_settings(dirty_data)
 
         for k, v in dirty_data.items():
             if k == BlackboardKey.LANGUAGE.value:
-                self.api.config_set_language(v)
-                self.api.command_refresh_i18n()
+                client_api.config_set_language(v)
+                client_api.command_refresh_i18n()
                 continue
 
         self.model.apply()

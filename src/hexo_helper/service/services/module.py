@@ -2,8 +2,8 @@ import tkinter
 from typing import Dict, Optional, Type
 
 from src.hexo_helper.common.constants import ModuleRegistryKey
-from src.hexo_helper.common.module.module import Module
-from src.hexo_helper.common.module.module import create_module_dict as c
+from src.hexo_helper.common.module import Module
+from src.hexo_helper.common.module import create_module_dict as c
 from src.hexo_helper.exceptions import (
     ActivateTreeException,
     ModuleInstanceNotFoundException,

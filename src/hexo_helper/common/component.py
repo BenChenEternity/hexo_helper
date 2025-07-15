@@ -1,16 +1,21 @@
 from typing import Any, List
 
-from src.hexo_helper.common.communication.communicator import Communicator
+from src.hexo_helper.core.event import Consumer, EventBus, Producer
 from src.hexo_helper.service.constants import EVENT_REQUEST_SERVICE
 from src.hexo_helper.service.services.enum import ServiceName
 
+service_request_bus = EventBus()
+command_bus = EventBus()
 
-class ServiceCommunicator(Communicator):
-    """
-    A generic communicator for sending requests to services.
-    It uses a single `call` method to interact with any service,
-    making it flexible and easy to extend.
-    """
+
+class ServiceConsumer(Consumer):
+    def __init__(self):
+        super().__init__(service_request_bus)
+
+
+class ServiceRequestProducer(Producer):
+    def __init__(self):
+        super().__init__(service_request_bus)
 
     def call(
         self,
@@ -40,7 +45,7 @@ class ServiceCommunicator(Communicator):
                 "args": kwargs,
             },
         }
-        responses = self.sender.send_event(EVENT_REQUEST_SERVICE, **context)
+        responses = self.send_event(EVENT_REQUEST_SERVICE, **context)
 
         # Filter the responses to get the data from the specific service
         filtered_data = self._filter_responses(responses, service_name.value)
@@ -50,10 +55,6 @@ class ServiceCommunicator(Communicator):
 
         return filtered_data
 
-    def destroy(self):
-        """Unsubscribes from all events."""
-        self.receiver.unsubscribe_all()
-
     @staticmethod
     def _filter_responses(responses: list, service_name_value: str) -> list:
         """Filters responses to get results from a specific service."""
@@ -61,3 +62,13 @@ class ServiceCommunicator(Communicator):
             return []
         # The response structure is [{service_name: result}]
         return [v for d in responses if d for k, v in d.items() if k == service_name_value]
+
+
+class CommandProducer(Producer):
+    def __init__(self):
+        super().__init__(command_bus)
+
+
+class CommandConsumer(Consumer):
+    def __init__(self):
+        super().__init__(command_bus)

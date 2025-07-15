@@ -6,7 +6,7 @@ from src.hexo_helper.core.event import EventBus
 from src.hexo_helper.core.mvc.controller import Controller
 from src.hexo_helper.core.mvc.model import Model
 from src.hexo_helper.core.mvc.view import View
-from src.hexo_helper.service.controller import CommunicationController
+from src.hexo_helper.service.controller import ServiceRequestController
 
 
 class Module:
@@ -17,7 +17,7 @@ class Module:
         # MVC
         self.model: Model | None = None
         self.view: View | None = None
-        self.controller: CommunicationController | None = None
+        self.controller: ServiceRequestController | None = None
 
         # tree structure
         self.instance_id = None
@@ -66,7 +66,7 @@ class Module:
         model_class, view_class, controller_class = self.get_mvc()
         model_class: type[Model]
         view_class: type[View]
-        controller_class: type[CommunicationController]
+        controller_class: type[ServiceRequestController]
 
         # internal event bus V->C for UI events
         internal_bus = EventBus()
