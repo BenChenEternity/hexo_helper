@@ -5,7 +5,11 @@ from PIL import ImageTk
 from src.hexo_helper.core.mvc.view import View
 from src.hexo_helper.core.utils.ui import UI
 from src.hexo_helper.core.widget import WidgetManager
-from src.hexo_helper.service.constants import MAIN_INFO_CLICKED, MAIN_SETTINGS_CLICKED
+from src.hexo_helper.service.constants import (
+    CLOSE_WINDOW_CLICKED,
+    MAIN_INFO_CLICKED,
+    MAIN_SETTINGS_CLICKED,
+)
 from src.hexo_helper.service.enum import BlackboardKey
 
 
@@ -83,8 +87,13 @@ class MainView(View):
 
     def setup_bindings(self):
         """Set up all event bindings here."""
+        self.master.protocol("WM_DELETE_WINDOW", lambda: self.producer.send_event(CLOSE_WINDOW_CLICKED))
+
         settings_button = self.widgets.get_by_id("settings_button")
         settings_button.config(command=lambda: self.producer.send_event(MAIN_SETTINGS_CLICKED))
 
         info_button = self.widgets.get_by_id("info_button")
         info_button.config(command=lambda: self.producer.send_event(MAIN_INFO_CLICKED))
+
+    def cleanup(self):
+        self.master.destroy()

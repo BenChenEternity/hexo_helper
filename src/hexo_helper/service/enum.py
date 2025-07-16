@@ -22,3 +22,4 @@ class ServiceName(Enum):
 class ModuleName(Enum):
     MAIN = "main"
     SETTINGS = "settings"
+    WORKSPACE = "workspace"

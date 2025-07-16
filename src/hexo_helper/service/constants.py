@@ -1,7 +1,9 @@
 # module name
-MODULE_MAIN = "main"
-MODULE_MAIN_SETTINGS = "main.settings"
-MODULE_MAIN_WORKSPACE = "main.workspace"
+from src.hexo_helper.service.enum import ModuleName
+
+MODULE_MAIN = ModuleName.MAIN.value
+MODULE_MAIN_SETTINGS = f"{MODULE_MAIN}.{ModuleName.SETTINGS.value}"
+MODULE_MAIN_WORKSPACE = f"{MODULE_MAIN}.{ModuleName.WORKSPACE.value}"
 
 # events
 # internal events

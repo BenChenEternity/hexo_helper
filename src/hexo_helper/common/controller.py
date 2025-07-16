@@ -4,7 +4,6 @@ from src.hexo_helper.common.component import CommandConsumer
 from src.hexo_helper.core.mvc.controller import Controller
 from src.hexo_helper.core.mvc.model import Model
 from src.hexo_helper.core.mvc.view import View
-from src.hexo_helper.service.client_api import client_api
 
 
 class ServiceRequestController(Controller):
@@ -21,6 +20,3 @@ class ServiceRequestController(Controller):
 
     def get_model_key(self) -> list:
         return self.model.keys()
-
-    def get_model_data(self) -> dict:
-        return {key: client_api.read_setting(key) for key in self.get_model_key() if key is not None}

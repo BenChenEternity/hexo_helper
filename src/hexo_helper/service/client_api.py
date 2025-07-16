@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Set
 
 from src.hexo_helper.common.component import ServiceRequestProducer
 from src.hexo_helper.service.enum import ServiceName
@@ -18,6 +18,15 @@ class ClientAPI(ServiceRequestProducer):
             operation="read",
             unique_response=True,
             key=key,
+        )
+
+    def read_settings_batch(self, keys: Set) -> dict:
+        """read multiple setting from the blackboard."""
+        return self.call(
+            service_name=ServiceName.BLACKBOARD.value,
+            operation="read_batch",
+            unique_response=True,
+            keys=keys,
         )
 
     def update_settings(self, data: dict) -> None:
@@ -59,14 +68,14 @@ class ClientAPI(ServiceRequestProducer):
     # --- Config Shortcuts ---
     def config_set_language(self, language: str) -> None:
         self.call(
-            service_name=ServiceName.CONFIG,
+            service_name=ServiceName.CONFIG.value,
             operation="set_language",
             language=language,
         )
 
     def config_set_theme(self, theme: str) -> None:
         self.call(
-            service_name=ServiceName.CONFIG,
+            service_name=ServiceName.CONFIG.value,
             operation="set_theme",
             theme=theme,
         )
@@ -74,7 +83,7 @@ class ClientAPI(ServiceRequestProducer):
     # --- Command Shortcuts ---
     def command_refresh_i18n(self) -> None:
         self.call(
-            service_name=ServiceName.COMMAND,
+            service_name=ServiceName.COMMAND.value,
             operation="refresh_i18n",
         )
 

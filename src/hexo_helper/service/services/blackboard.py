@@ -1,4 +1,5 @@
 import copy
+from typing import Set
 
 from src.hexo_helper.core.blackboard import Blackboard
 from src.hexo_helper.core.settings import SettingsManager
@@ -27,6 +28,7 @@ class BlackboardService(Service):
     def _get_operation_mapping(self) -> dict:
         return {
             "read": self.read,
+            "read_batch": self.read_batch,
             "write": self.write,
             "update": self.update,
         }
@@ -36,6 +38,9 @@ class BlackboardService(Service):
 
     def read(self, key: str):
         return self.blackboard.get(key)
+
+    def read_batch(self, keys: Set):
+        return {key: self.blackboard.get(key) for key in keys}
 
     def write(self, key: str, value):
         self.blackboard.set(key, value)

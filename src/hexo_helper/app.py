@@ -2,6 +2,7 @@ import logging
 
 import ttkbootstrap as ttkb
 
+import src.hexo_helper.service.modules  # noqa
 from src.hexo_helper.core.log import LoggingManager
 from src.hexo_helper.service.services.blackboard import BlackboardService
 from src.hexo_helper.service.services.command import CommandService

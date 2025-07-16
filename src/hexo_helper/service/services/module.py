@@ -1,44 +1,24 @@
 import tkinter
-from typing import Dict, Optional, Type
+from typing import Optional, Type
 
 from src.hexo_helper.common.constants import ModuleRegistryKey
-from src.hexo_helper.common.module import Module
-from src.hexo_helper.common.module import create_module_dict as c
+from src.hexo_helper.common.module import (
+    Module,
+    get_module_registry,
+)
 from src.hexo_helper.exceptions import (
     ActivateTreeException,
     ModuleInstanceNotFoundException,
 )
-from src.hexo_helper.service.enum import ModuleName, ServiceName
-from src.hexo_helper.service.modules.main.module import MainModule
-from src.hexo_helper.service.modules.main.settings.module import SettingsModule
+from src.hexo_helper.service.constants import MODULE_MAIN
+from src.hexo_helper.service.enum import ServiceName
 from src.hexo_helper.service.services.base import Service
-
-registered_modules = {
-    ModuleName.MAIN.value: c(
-        MainModule,
-        {
-            ModuleName.SETTINGS.value: c(
-                SettingsModule,
-                None,
-                False,
-            )
-        },
-    )
-}
 
 
 class ModuleService(Service):
     @classmethod
     def get_name(cls):
         return ServiceName.MODULE.value
-
-    def start(self):
-        # build
-        self.activated_tree = self._build_activated_tree(
-            ModuleName.MAIN.value,
-            self.registered_modules[ModuleName.MAIN.value],
-            None,
-        )
 
     def _get_operation_mapping(self) -> dict:
         return {
@@ -47,26 +27,23 @@ class ModuleService(Service):
         }
 
     def shutdown(self):
-        self.activated_tree.deactivate()
+        # when close is clicked, modules has been cleaned up.
+        return
 
     def __init__(self, root: tkinter.Tk):
         super().__init__()
-        self.registered_modules = registered_modules
-        self._inject_ids(self.registered_modules)
         self.root = root
         self.activated_tree: Module | None = None
 
-    def _inject_ids(self, module_dict: Dict[str, dict], parent_path: str = ""):
-        # dynamic injection
-        for name, meta in module_dict.items():
-            module_cls = meta[ModuleRegistryKey.CLASS.value]
-            full_path = f"{parent_path}.{name}" if parent_path else name
-            module_cls.id = full_path
+    def start(self):
+        """
+        Kicks off the application by activating the initial root module(s).
+        """
+        registry = get_module_registry()
+        root_module: str = MODULE_MAIN  # noqa
+        root_data = registry.get(root_module)
 
-            # recursively inject
-            children = meta.get(ModuleRegistryKey.CHILD_MODULES.value)
-            if children:
-                self._inject_ids(children, full_path)
+        self.activated_tree = self._build_activated_tree(root_module, root_data, None)
 
     def _build_activated_tree(
         self, module_id: str, module_info: dict, parent_instance: Optional[Module]
@@ -95,8 +72,16 @@ class ModuleService(Service):
 
         return module_instance
 
-    def get_registered_module_info(self, id: str) -> dict:
-        return ModuleService._get_from_dict(self.registered_modules, id)
+    def get_registered_module_info(self, module_id: str) -> dict:
+        """
+        Retrieves module metadata directly from the flat registry.
+        This is much more efficient than traversing a nested dictionary.
+        """
+        # We can now directly access the original flat registry for info.
+        registry = get_module_registry()
+        if module_id not in registry:
+            raise KeyError(f"Module with ID '{module_id}' not found in registry.")
+        return registry[module_id]
 
     def get_activated_instance(self, id: str) -> Module | None:
         parts = id.split(".")
@@ -168,6 +153,11 @@ class ModuleService(Service):
 
     def deactivate(self, instance_id: str):
         instance: Module = self.get_activated_instance(instance_id)
+        # deactivate children
+        if instance.children:
+            for child in list(instance.children.values()):
+                self.deactivate(child.instance_id)
+
         instance.deactivate()
 
         id_parts = instance_id.split(".")
@@ -200,22 +190,19 @@ class ModuleService(Service):
         module_info: dict = self.get_registered_module_info(module_id)
         module_cls: Type[Module] = module_info[ModuleRegistryKey.CLASS.value]
 
-        # 2. Create module instance
-        module = module_cls()
-
-        # 3. Configure instance based on whether it's a root or child module
+        # 2. Configure instance based on whether it's a root or child module
         if parent_instance:
             # It's a child module, so it inherits its master from the parent
             instance_id = f"{parent_instance.get_instance_id()}.{instance_name}"
-            master = parent_instance.view.master
+            master = parent_instance.get_master()
         else:
             # It's a root module, so it uses the main Tk instance
             instance_id = instance_name
             master = self.root
 
+        # 3. Create module instance
+        module = module_cls(instance_id, master)
         # 4. Set instance properties and call its setup method
-        module.set_instance_id(instance_id)
-        module.set_master(master)
         module.on_ready()
 
         return module

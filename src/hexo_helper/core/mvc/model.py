@@ -1,5 +1,7 @@
 from typing import Any, Dict
 
+from src.hexo_helper.core.utils.compare import deep_equals
+
 
 class Model:
     def get(self, key: str) -> Any:
@@ -20,7 +22,7 @@ class Model:
             self.set(key, value)
 
     def to_dict(self) -> Dict[str, Any]:
-        pass
+        return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
     def cleanup(self):
         pass
@@ -50,14 +52,14 @@ class DiffModel(Model):
         current_value = getattr(self, key)
 
         # If the value remains unchanged, do nothing.
-        if current_value == value:
+        if deep_equals(current_value, value):
             return
 
         # Update the current attribute.
         setattr(self, key, value)
 
         # Check against the original value to determine if it's dirty.
-        if key in self._origin and getattr(self, key) != self._origin[key]:
+        if key in self._origin and not deep_equals(getattr(self, key), self._origin[key]):
             self._dirty_fields.add(key)
         else:
             # If it's now back to the original value, remove it from dirty fields.

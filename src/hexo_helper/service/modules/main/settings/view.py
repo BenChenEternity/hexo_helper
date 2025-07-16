@@ -37,6 +37,11 @@ class SettingsView(View):
         self.theme_var = tk.StringVar()
 
         self.settings_icon = None
+        # which dirty indicator is to change
+        self.dirty_indicator_map = {
+            BlackboardKey.LANGUAGE.value: "language_label_star",
+            BlackboardKey.THEME.value: "theme_label_star",
+        }
 
     def create_widgets(self):
         """
@@ -195,12 +200,19 @@ class SettingsView(View):
         toplevel_window.iconphoto(False, self.settings_icon)
 
     def mark_dirty(self, labels: Set) -> None:
-        for label in labels:
-            widget = self.widgets.get_by_id(f"{label}_label_star")
+        for field_name in labels:
+            widget_id = self.dirty_indicator_map.get(field_name)
+            if not widget_id:
+                continue
+
+            widget = self.widgets.get_by_id(widget_id)
             if widget is None:
-                raise WidgetNotFoundException
+                raise WidgetNotFoundException(f"Widget with ID '{widget_id}' not found for field '{field_name}'")
             widget.config(text="*")
-        self.widgets.get_by_id("apply_button").config(state="normal")
+
+        apply_button = self.widgets.get_by_id(I18nWidgetsId.APPLY_BUTTON.value)
+        if apply_button:
+            apply_button.config(state="normal")
 
     def clear_dirty(self):
         indicators: list = self.widgets.get_by_tag("dirty_indicator")

@@ -1,6 +1,7 @@
 from src.hexo_helper.common.controller import ServiceRequestController
 from src.hexo_helper.service.client_api import client_api
 from src.hexo_helper.service.constants import (
+    CLOSE_WINDOW_CLICKED,
     MAIN_SETTINGS_CLICKED,
     MODULE_MAIN_SETTINGS,
 )
@@ -18,6 +19,7 @@ class MainController(ServiceRequestController):
 
     def setup_handlers(self):
         # UI event
+        self.internal_consumer.subscribe(CLOSE_WINDOW_CLICKED, self._on_close)
         self.internal_consumer.subscribe(MAIN_SETTINGS_CLICKED, self._on_settings_click)
 
     def on_ready(self):
@@ -30,6 +32,9 @@ class MainController(ServiceRequestController):
                 "app": client_api.load_image("app.png"),
             }
         )
+
+    def _on_close(self):
+        client_api.deactivate_module(self.instance_id)
 
     def get_model_data(self):
         return {

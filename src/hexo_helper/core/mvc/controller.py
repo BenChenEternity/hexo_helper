@@ -26,17 +26,15 @@ class Controller:
         """
         pass
 
-    @abstractmethod
-    def get_model_data(self) -> dict:
-        pass
-
     def on_ready(self):
         self.setup_handlers()
-        model_data = self.get_model_data()
-        self.model.init(model_data)
+        self.model.init(self.get_model_data())
         self.view.create_widgets()
         self.view.setup_bindings()
-        self.view.init_data(model_data)
+        self.view.init_data(self.model.to_dict())
+
+    def get_model_data(self):
+        pass
 
     def cleanup(self):
         self.internal_consumer.unsubscribe_all()
