@@ -9,6 +9,7 @@ from src.hexo_helper.service.constants import (
     MAIN_SETTINGS_LANGUAGE_SELECTED,
     MAIN_SETTINGS_THEME_SELECTED,
 )
+from src.hexo_helper.service.controller_mixin import BlackboardMixin
 from src.hexo_helper.service.enum import BlackboardKey
 from src.hexo_helper.service.modules.main.settings.model import SettingsModel
 from src.hexo_helper.service.modules.main.settings.view import SettingsView
@@ -16,7 +17,7 @@ from src.hexo_helper.service.modules.main.settings.view import SettingsView
 logger = logging.getLogger(__name__)
 
 
-class SettingsController(ServiceRequestController):
+class SettingsController(BlackboardMixin, ServiceRequestController):
     model: SettingsModel
     view: SettingsView
 

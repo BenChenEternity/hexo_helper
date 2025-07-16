@@ -20,7 +20,7 @@ class Model:
             self.set(key, value)
 
     def to_dict(self) -> Dict[str, Any]:
-        pass
+        return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
     def cleanup(self):
         pass

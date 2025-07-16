@@ -200,22 +200,19 @@ class ModuleService(Service):
         module_info: dict = self.get_registered_module_info(module_id)
         module_cls: Type[Module] = module_info[ModuleRegistryKey.CLASS.value]
 
-        # 2. Create module instance
-        module = module_cls()
-
-        # 3. Configure instance based on whether it's a root or child module
+        # 2. Configure instance based on whether it's a root or child module
         if parent_instance:
             # It's a child module, so it inherits its master from the parent
             instance_id = f"{parent_instance.get_instance_id()}.{instance_name}"
-            master = parent_instance.view.master
+            master = parent_instance.get_master()
         else:
             # It's a root module, so it uses the main Tk instance
             instance_id = instance_name
             master = self.root
 
+        # 3. Create module instance
+        module = module_cls(instance_id, master)
         # 4. Set instance properties and call its setup method
-        module.set_instance_id(instance_id)
-        module.set_master(master)
         module.on_ready()
 
         return module

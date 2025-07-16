@@ -13,14 +13,17 @@ class Module:
     id = None
     count = 0
 
-    def __init__(self):
-        # MVC
+    def __init__(self, instance_id: str, master):
+        # M
         self.model: Model | None = None
+        # V
+        self.master = master
         self.view: View | None = None
+        # C
         self.controller: ServiceRequestController | None = None
 
         # tree structure
-        self.instance_id = None
+        self.instance_id = instance_id
         self.children: Dict[str, Module] = {}
 
         # assemble
@@ -49,15 +52,11 @@ class Module:
     def count_increment(cls):
         cls.count += 1
 
-    def set_instance_id(self, instance_id: str):
-        self.instance_id = instance_id
-        self.controller.set_instance_id(instance_id)
-
     def get_instance_id(self):
         return self.instance_id
 
-    def set_master(self, master):
-        self.view.set_master(master)
+    def get_master(self):
+        return self.master
 
     def _init_mvc(self) -> None:
         """
@@ -72,11 +71,13 @@ class Module:
         internal_bus = EventBus()
 
         # init MVC
-        self.model = model_class() if model_class else None
+        if model_class:
+            self.model = model_class()
 
         if view_class:
             self.view = view_class()
             self.view.set_internal_bus(internal_bus)
+            self.view.set_master(self.master)
 
         if controller_class:
             self.controller = controller_class(self.model, self.view)
@@ -84,6 +85,7 @@ class Module:
 
     def on_ready(self):
         if self.controller:
+            self.controller.set_instance_id(self.instance_id)
             self.controller.on_ready()
 
     def deactivate(self):
