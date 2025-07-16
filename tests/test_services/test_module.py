@@ -1,247 +1,182 @@
-import tkinter
-from unittest.mock import MagicMock
-
 import pytest
 
-import src.hexo_helper.service.services.module as service_module
-from src.hexo_helper.common import ModuleRegistryKey
-from src.hexo_helper.common.module import Module, create_module_dict
+from src.hexo_helper.common.module import Module
 
 
-# Define specific mock module classes
-class MainModuleMock(Module):
-    pass
+class ConcreteTestModule(Module):
+    """A concrete Module subclass for instantiation during tests."""
+
+    # This method will be mocked during tests to control what MVC components are returned
+    @classmethod
+    def get_mvc(cls):
+        # This base implementation should not be called in tests
+        raise NotImplementedError
 
 
-class SettingsModuleMock(Module):
-    pass
+class TestModule:
+    """
+    Unit test suite for the abstract Module class.
+    """
 
+    @pytest.fixture
+    def mock_mvc_components(self, mocker):
+        """
+        A fixture that creates mock classes for Model, View, and Controller.
+        """
+        # Create mock classes. When these are instantiated, they will return a mock instance.
+        mock_model_class = mocker.Mock()
+        mock_view_class = mocker.Mock()
+        mock_controller_class = mocker.Mock()
+        return mock_model_class, mock_view_class, mock_controller_class
 
-class DashboardModuleMock(Module):
-    pass
+    @pytest.fixture
+    def module_instance(self, mocker, mock_mvc_components):
+        """
+        A fixture that provides a fully initialized instance of ConcreteTestModule
+        with all its dependencies (MVC, EventBus) mocked out.
+        """
+        mock_model_class, mock_view_class, mock_controller_class = mock_mvc_components
 
-
-class WidgetModuleMock(Module):
-    pass
-
-
-class UniqueToolMock(Module):
-    pass
-
-
-class NonUniqueToolMock(Module):
-    pass
-
-
-@pytest.fixture
-def module_service_fixture(monkeypatch):
-    """Sets up a mock environment and a ModuleService instance for testing."""
-    # Reset counters for non-unique modules to ensure test isolation
-    NonUniqueToolMock.count = 0
-
-    # Define a complex module hierarchy for comprehensive testing
-    test_registered_modules = {
-        "main": create_module_dict(
-            MainModuleMock,
-            {
-                "settings": create_module_dict(
-                    SettingsModuleMock,
-                    activate_immediately=False,
-                ),
-                "dashboard": create_module_dict(
-                    DashboardModuleMock,
-                    {
-                        "widget": create_module_dict(
-                            WidgetModuleMock,
-                        ),
-                        "unique_tool": create_module_dict(
-                            UniqueToolMock,
-                        ),
-                    },
-                ),
-                "non_unique_tool": create_module_dict(NonUniqueToolMock, is_unique=False),
-            },
+        # Patch the get_mvc method of our concrete class to return the mock classes
+        mocker.patch.object(
+            ConcreteTestModule, "get_mvc", return_value=(mock_model_class, mock_view_class, mock_controller_class)
         )
-    }
-    monkeypatch.setattr(service_module, "registered_modules", test_registered_modules)
 
-    # Mock the tkinter root window
-    mock_root = MagicMock(spec=tkinter.Toplevel)
+        # Patch EventBus so we can verify it's created and used
+        mock_event_bus_instance = mocker.Mock()
+        mocker.patch("src.hexo_helper.common.module.EventBus", return_value=mock_event_bus_instance)
 
-    # Instantiate the service
-    service = service_module.ModuleService(mock_root)
-    service.registered_modules = test_registered_modules
+        # Instantiate the module. This will trigger __init__ and _init_mvc
+        instance = ConcreteTestModule()
+        return instance, mock_event_bus_instance
 
-    return service
-
-
-class TestModuleService:
-    """A collection of unit tests for the ModuleService class."""
-
-    def test_initialization_and_id_injection(self, module_service_fixture):
+    def test_initialization_and_mvc_setup(self, module_instance, mock_mvc_components):
         """
-        Tests if the service initializes correctly and injects the full path IDs
-        into the module classes.
+        Test if the module correctly initializes its MVC components via _init_mvc.
         """
-        service = module_service_fixture
-        assert service is not None
-        assert isinstance(service.activated_tree, MainModuleMock)
+        instance, mock_event_bus_instance = module_instance
+        mock_model_class, mock_view_class, mock_controller_class = mock_mvc_components
 
-        # Verify that IDs were injected correctly into the class attributes
-        assert MainModuleMock.id == "main"
-        assert SettingsModuleMock.id == "main.settings"
-        assert DashboardModuleMock.id == "main.dashboard"
-        assert WidgetModuleMock.id == "main.dashboard.widget"
-        assert UniqueToolMock.id == "main.dashboard.unique_tool"
-        assert NonUniqueToolMock.id == "main.non_unique_tool"
+        # 1. Verify that the MVC classes were instantiated
+        mock_model_class.assert_called_once()
+        mock_view_class.assert_called_once()
+        mock_controller_class.assert_called_once()
 
-    def test_initial_activated_tree_structure(self, module_service_fixture):
+        # 2. Verify that the instances are assigned to the correct attributes
+        assert instance.model is not None
+        assert instance.view is not None
+        assert instance.controller is not None
+
+        # 3. Verify that the internal event bus was passed to the view and controller
+        instance.view.set_internal_bus.assert_called_once_with(mock_event_bus_instance)
+        instance.controller.set_internal_bus.assert_called_once_with(mock_event_bus_instance)
+
+    def test_class_methods_for_id_and_count(self):
         """
-        Tests if the initial tree of activated modules is built correctly,
-        respecting the 'activate_immediately' flag.
+        Test the static-like class methods for ID and counting.
         """
-        service = module_service_fixture
+        # Set a class attribute for testing
+        ConcreteTestModule.id = "test.module"
+        assert ConcreteTestModule.get_id() == "test.module"
 
-        # main is the root and should always be activated
-        main_module = service.activated_tree
-        assert isinstance(main_module, MainModuleMock)
+        # Test counting mechanism
+        initial_count = ConcreteTestModule.get_count()
+        ConcreteTestModule.count_increment()
+        assert ConcreteTestModule.get_count() == initial_count + 1
 
-        # dashboard was marked 'activate_immediately', so it should be a child
-        assert "dashboard" in main_module.children
-        dashboard_module = main_module.children["dashboard"]
-        assert isinstance(dashboard_module, DashboardModuleMock)
+        # Reset for test isolation
+        ConcreteTestModule.count = initial_count
 
-        # widget is a child of dashboard and also marked 'activate_immediately'
-        assert "widget" in dashboard_module.children
-        assert isinstance(dashboard_module.children["widget"], WidgetModuleMock)
-
-        # settings was not marked 'activate_immediately', so it should NOT be in the tree
-        assert "settings" not in main_module.children
-
-    def test_get_registered_module_info(self, module_service_fixture):
+    def test_instance_id_management(self, module_instance):
         """
-        Tests successful retrieval of module metadata from the registration dictionary.
+        Test the setter and getter for the instance_id.
         """
-        service = module_service_fixture
+        instance, _ = module_instance
+        test_id = "main.settings@1"
 
-        # Test root level
-        info = service.get_registered_module_info("main")
-        assert info[ModuleRegistryKey.CLASS.value] == MainModuleMock
+        # Call the setter
+        instance.set_instance_id(test_id)
 
-        # Test nested level
-        info = service.get_registered_module_info("main.dashboard")
-        assert info[ModuleRegistryKey.CLASS.value] == DashboardModuleMock
+        # Verify the instance_id attribute is set
+        assert instance.instance_id == test_id
 
-        # Test deep nested level
-        info = service.get_registered_module_info("main.dashboard.widget")
-        assert info[ModuleRegistryKey.CLASS.value] == WidgetModuleMock
+        # Verify the call is passed down to the controller
+        instance.controller.set_instance_id.assert_called_once_with(test_id)
 
-    def test_get_registered_module_info_failure(self, module_service_fixture):
-        """Tests that getting info for a non-existent module raises a KeyError."""
-        service = module_service_fixture
-        with pytest.raises(KeyError, match="Module path not found: main.fake"):
-            service.get_registered_module_info("main.fake")
+        # Verify the getter returns the correct value
+        assert instance.get_instance_id() == test_id
 
-        with pytest.raises(KeyError, match="No child modules under: main.dashboard.widget"):
-            service.get_registered_module_info("main.dashboard.widget.child")
-
-    def test_get_activated_module(self, module_service_fixture):
-        """Tests successful retrieval of already activated module instances."""
-        service = module_service_fixture
-
-        main_module = service.get_activated_instance("main")
-        assert isinstance(main_module, MainModuleMock)
-
-        dashboard_module = service.get_activated_instance("main.dashboard")
-        assert isinstance(dashboard_module, DashboardModuleMock)
-
-        widget_module = service.get_activated_instance("main.dashboard.widget")
-        assert isinstance(widget_module, WidgetModuleMock)
-
-    def test_get_activated_module_failure(self, module_service_fixture):
+    def test_set_master(self, module_instance, mocker):
         """
-        Tests that getting a non-activated or non-existent module instance
-        raises the appropriate errors.
+        Test if the set_master call is correctly passed to the view.
         """
-        service = module_service_fixture
+        instance, _ = module_instance
+        mock_master_widget = mocker.Mock()
 
-        # settings is registered but not activated
-        with pytest.raises(KeyError):
-            service.get_activated_instance("main.settings")
+        instance.set_master(mock_master_widget)
 
-        # fake does not exist at all
-        with pytest.raises(KeyError):
-            service.get_activated_instance("main.fake")
+        instance.view.set_master.assert_called_once_with(mock_master_widget)
 
-        # Root module mismatch
-        with pytest.raises(ValueError):
-            service.get_activated_instance("fake_root.dashboard")
-
-    def test_activate_unique_module(self, module_service_fixture):
-        # TODO 先完善 MVC
-        """Tests activating a module marked as unique."""
-        service = module_service_fixture
-
-        # Activate the unique tool under the dashboard
-        with pytest.raises(RuntimeError):
-            service.activate("main.dashboard.unique_tool", "main.dashboard", {"data": 1})
-
-        # Verify it was added to the tree
-        activated_tool = service.get_activated_instance("main.dashboard.unique_tool")
-        assert isinstance(activated_tool, UniqueToolMock)
-        assert activated_tool.model.data == {"data": 1}
-
-        # Activating it again should just replace it under the same name
-        instance_name_2 = service.activate("main.dashboard.unique_tool", "main.dashboard", {"data": 2})
-        assert instance_name_2 == "unique_tool"
-
-        # The parent should still have only one child with that name
-        dashboard = service.get_activated_instance("main.dashboard")
-        assert len([c for c in dashboard.children if c.startswith("unique_tool")]) == 1
-
-        # Verify the new instance is now in the tree
-        activated_tool_2 = service.get_activated_instance("main.dashboard.unique_tool")
-        assert activated_tool_2.model_data == {"data": 2}
-
-    def test_activate_non_unique_module(self, module_service_fixture):
-        # TODO 先完善 MVC
+    def test_on_ready(self, module_instance):
         """
-        Tests activating a module not marked as unique, which should result
-        in numbered instances.
+        Test if the on_ready call is correctly passed to the controller.
         """
-        service = module_service_fixture
+        instance, _ = module_instance
 
-        # Activate the first instance
-        instance_name_1 = service.activate("main.non_unique_tool", "main", {"id": 1})
-        assert instance_name_1 == "non_unique_tool@1"
+        instance.on_ready()
 
-        # Verify it exists in the tree
-        tool1 = service.get_activated_instance("main.non_unique_tool@1")
-        assert isinstance(tool1, NonUniqueToolMock)
-        assert tool1.model_data == {"id": 1}
+        instance.controller.on_ready.assert_called_once()
 
-        # Activate a second instance
-        instance_name_2 = service.activate("main.non_unique_tool", "main", {"id": 2})
-        assert instance_name_2 == "non_unique_tool@2"
-
-        # Verify the second one also exists
-        tool2 = service.get_activated_instance("main.non_unique_tool@2")
-        assert isinstance(tool2, NonUniqueToolMock)
-        assert tool2.model_data == {"id": 2}
-
-        # Check that the parent has both children
-        main_module = service.get_activated_instance("main")
-        assert "non_unique_tool@1" in main_module.children
-        assert "non_unique_tool@2" in main_module.children
-
-    def test_activate_module_with_non_activated_parent(self, module_service_fixture):
+    def test_add_child_and_prevent_duplicates(self, module_instance, mocker):
         """
-        Tests that attempting to activate a module under a parent that is not
-        currently activated raises a KeyError.
+        Test adding a child module and handling of duplicate names.
         """
-        service = module_service_fixture
+        instance, _ = module_instance
+        mock_child_module = mocker.Mock(spec=Module)
 
-        # main.settings is a valid registration path, but it's not an activated module.
-        # Therefore, we cannot add a child to it.
-        with pytest.raises(KeyError):
-            service.activate("main.dashboard.widget", "main.settings", {})
+        # Add a child successfully
+        instance.add_child("child1", mock_child_module)
+        assert instance.children["child1"] == mock_child_module
+
+        # Try to add a child with the same name, expecting an error
+        with pytest.raises(RuntimeError, match="Module (child1) already exists"):
+            instance.add_child("child1", mock_child_module)
+
+    def test_deactivate_recursive_cleanup(self, module_instance, mocker):
+        """
+        Test that deactivate calls cleanup on its components and recursively on its children.
+        """
+        instance, _ = module_instance
+
+        # Create a mock child and add it
+        mock_child_module = mocker.Mock(spec=Module)
+        instance.add_child("child1", mock_child_module)
+
+        # Call deactivate
+        instance.deactivate()
+
+        # 1. Verify it calls deactivate on its children
+        mock_child_module.deactivate.assert_called_once()
+
+        # 2. Verify it calls cleanup on its own MVC components
+        instance.model.cleanup.assert_called_once()
+        instance.view.cleanup.assert_called_once()
+        instance.controller.cleanup.assert_called_once()
+
+    def test_highlight_view(self, module_instance, mocker):
+        """
+        Test that highlight_view correctly interacts with the view and its window.
+        """
+        instance, _ = module_instance
+
+        # Mock the window object that the view is supposed to return
+        mock_window = mocker.Mock()
+        instance.view.get_window.return_value = mock_window
+
+        instance.highlight_view()
+
+        # Verify the sequence of calls
+        instance.view.get_window.assert_called_once()
+        mock_window.deiconify.assert_called_once()
+        mock_window.lift.assert_called_once()
+        mock_window.focus_force.assert_called_once()
