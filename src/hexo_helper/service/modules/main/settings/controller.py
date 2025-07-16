@@ -1,5 +1,6 @@
 import logging
 
+from src.hexo_helper.common.controller import ServiceRequestController
 from src.hexo_helper.service.client_api import client_api
 from src.hexo_helper.service.constants import (
     CLOSE_WINDOW_CLICKED,
@@ -8,7 +9,6 @@ from src.hexo_helper.service.constants import (
     MAIN_SETTINGS_LANGUAGE_SELECTED,
     MAIN_SETTINGS_THEME_SELECTED,
 )
-from src.hexo_helper.service.controller import ServiceRequestController
 from src.hexo_helper.service.enum import BlackboardKey
 from src.hexo_helper.service.modules.main.settings.model import SettingsModel
 from src.hexo_helper.service.modules.main.settings.view import SettingsView

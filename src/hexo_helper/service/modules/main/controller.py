@@ -1,9 +1,9 @@
+from src.hexo_helper.common.controller import ServiceRequestController
 from src.hexo_helper.service.client_api import client_api
 from src.hexo_helper.service.constants import (
     MAIN_SETTINGS_CLICKED,
     MODULE_MAIN_SETTINGS,
 )
-from src.hexo_helper.service.controller import ServiceRequestController
 from src.hexo_helper.service.enum import BlackboardKey
 from src.hexo_helper.service.modules.main.model import MainModel
 from src.hexo_helper.service.modules.main.view import MainView

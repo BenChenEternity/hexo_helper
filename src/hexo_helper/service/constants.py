@@ -14,4 +14,3 @@ MAIN_INFO_CLICKED = "main_info_clicked"
 
 # command module events
 COMMAND_REFRESH_I18N = "command_refresh_i18n"
-EVENT_REQUEST_SERVICE = "event_request_service"

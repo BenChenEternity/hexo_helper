@@ -14,7 +14,7 @@ class ClientAPI(ServiceRequestProducer):
     def read_setting(self, key: str) -> Any:
         """read a setting from the blackboard."""
         return self.call(
-            service_name=ServiceName.BLACKBOARD,
+            service_name=ServiceName.BLACKBOARD.value,
             operation="read",
             unique_response=True,
             key=key,
@@ -23,7 +23,7 @@ class ClientAPI(ServiceRequestProducer):
     def update_settings(self, data: dict) -> None:
         """update multiple settings."""
         self.call(
-            service_name=ServiceName.BLACKBOARD,
+            service_name=ServiceName.BLACKBOARD.value,
             operation="update",
             data=data,
         )
@@ -32,7 +32,7 @@ class ClientAPI(ServiceRequestProducer):
     def activate_module(self, module_id: str, parent_instance_id: str) -> None:
         """activate a module."""
         self.call(
-            service_name=ServiceName.MODULE,
+            service_name=ServiceName.MODULE.value,
             operation="activate",
             module_id=module_id,
             parent_instance_id=parent_instance_id,
@@ -41,7 +41,7 @@ class ClientAPI(ServiceRequestProducer):
     def deactivate_module(self, instance_id: str) -> None:
         """deactivate a module instance."""
         self.call(
-            service_name=ServiceName.MODULE,
+            service_name=ServiceName.MODULE.value,
             operation="deactivate",
             instance_id=instance_id,
         )
@@ -50,7 +50,7 @@ class ClientAPI(ServiceRequestProducer):
     def load_image(self, name: str) -> Any:
         """load an image resource."""
         return self.call(
-            service_name=ServiceName.RESOURCE,
+            service_name=ServiceName.RESOURCE.value,
             operation="load_image",
             unique_response=True,
             name=name,

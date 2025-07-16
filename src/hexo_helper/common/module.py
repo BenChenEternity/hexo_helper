@@ -2,11 +2,11 @@ from abc import abstractmethod
 from typing import Dict, Optional, Type
 
 from src.hexo_helper.common.constants import ModuleRegistryKey
+from src.hexo_helper.common.controller import ServiceRequestController
 from src.hexo_helper.core.event import EventBus
 from src.hexo_helper.core.mvc.controller import Controller
 from src.hexo_helper.core.mvc.model import Model
 from src.hexo_helper.core.mvc.view import View
-from src.hexo_helper.service.controller import ServiceRequestController
 
 
 class Module:

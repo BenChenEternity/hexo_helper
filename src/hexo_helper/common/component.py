@@ -1,8 +1,7 @@
 from typing import Any, List
 
+from src.hexo_helper.common.constants import EVENT_REQUEST_SERVICE
 from src.hexo_helper.core.event import Consumer, EventBus, Producer
-from src.hexo_helper.service.constants import EVENT_REQUEST_SERVICE
-from src.hexo_helper.service.enum import ServiceName
 
 service_request_bus = EventBus()
 command_bus = EventBus()
@@ -19,7 +18,7 @@ class ServiceRequestProducer(Producer):
 
     def call(
         self,
-        service_name: ServiceName,
+        service_name: str,
         operation: str,
         unique_response: bool = False,
         **kwargs: Any,
@@ -28,7 +27,7 @@ class ServiceRequestProducer(Producer):
         Calls a service with a specific operation and arguments.
 
         Args:
-            service_name (ServiceName): The enum of the service to call.
+            service_name: service to call.
             operation (str): The name of the operation to execute.
             unique_response (bool): If True, expects a single result and returns it directly.
                                      Otherwise, returns a list of results.
@@ -39,7 +38,7 @@ class ServiceRequestProducer(Producer):
         """
         # The _send method now directly uses the operation and kwargs
         context = {
-            "name": service_name.value,
+            "name": service_name,
             "action": {
                 "operation": operation,
                 "args": kwargs,
@@ -48,7 +47,7 @@ class ServiceRequestProducer(Producer):
         responses = self.send_event(EVENT_REQUEST_SERVICE, **context)
 
         # Filter the responses to get the data from the specific service
-        filtered_data = self._filter_responses(responses, service_name.value)
+        filtered_data = self._filter_responses(responses, service_name)
 
         if unique_response:
             return filtered_data[0] if filtered_data else None

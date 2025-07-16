@@ -1,8 +1,8 @@
 # flake8: noqa
 import pytest
 
+from src.hexo_helper.common.constants import EVENT_REQUEST_SERVICE
 from src.hexo_helper.exceptions import ServiceNotFoundException
-from src.hexo_helper.service.constants import EVENT_REQUEST_SERVICE
 from src.hexo_helper.services_manager import ServiceManager
 
 
