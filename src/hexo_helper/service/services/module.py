@@ -99,24 +99,6 @@ class ModuleService(Service):
 
         return current
 
-    @staticmethod
-    def _get_from_dict(d: dict, path: str):
-        current = d
-        parts = path.split(".")
-        for i, part in enumerate(parts):
-            if part not in current:
-                raise KeyError(f"Module path not found: {'.'.join(parts[:i + 1])}")
-
-            module_info = current[part]
-
-            if i == len(parts) - 1:
-                return module_info
-
-            # recursion
-            current = module_info.get(ModuleRegistryKey.CHILD_MODULES.value)
-            if current is None:
-                raise KeyError(f"No child modules under: {'.'.join(parts[:i + 1])}")
-
     def activate(self, module_id: str, parent_instance_id: Optional[str]):
         """
         Dynamically activates a new module and adds it to the live tree using the shared helper.
